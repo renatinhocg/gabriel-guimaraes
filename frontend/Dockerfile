@@ -1,6 +1,6 @@
 ## Multi-stage build for frontend (Vite React)
 # Build stage
-FROM node:18-alpine AS build
+FROM node:18-bullseye-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -8,7 +8,7 @@ COPY . .
 RUN npm run build
 
 # Production image (nginx)
-FROM nginx:stable-alpine
+FROM nginx:stable
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
