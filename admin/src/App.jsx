@@ -1,10 +1,17 @@
 import React from 'react'
 
-export default function App(){
+export default function App() {
   return (
-    <div className="admin-root">
-      <h1>Admin App</h1>
-      <p>Painel administrativo (simples placeholder)</p>
+    <div className="app">
+      <header>
+        <h1>Admin</h1>
+        <p>Aplicação administrativa — use este painel para gerenciar o sistema.</p>
+      </header>
+      <main>
+        <p>
+          Backend: <a href="/api/hello">/api/hello</a>
+        </p>
+      </main>
     </div>
   )
 }
