@@ -17,6 +17,87 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build frontend artifacts (Node job)
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build admin artifacts (Node job)
+        working-directory: ./admin
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build backend (check)
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm run build --if-present || echo "no build script for backend"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-frontend:latest,ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-frontend:${{ github.sha }}
+          platforms: linux/amd64
+
+      - name: Build and push admin image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./admin
+          file: ./admin/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-admin:latest,ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-admin:${{ github.sha }}
+          platforms: linux/amd64
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-backend:latest,ghcr.io/${{ github.repository_owner }}/gabriel-guimaraes-backend:${{ github.sha }}
+          platforms: linux/amd64
+name: Build and push Docker images
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      packages: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
