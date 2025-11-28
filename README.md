@@ -35,3 +35,35 @@ Endpoints de exemplo:
 
 - Backend: GET /health => status
 - Backend: GET /api/hello => { message: 'Hello from backend!' }
+ - Backend: GET /api/db-ping => test connection to Postgres (returns DB time when configured)
+
+Configuração do Postgres (dev)
+
+1) Exemplo rápido usando Docker (cria um container PostgreSQL):
+
+```powershell
+docker run --name local-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=app_db -p 5432:5432 -d postgres:15
+```
+
+2) Variáveis de ambiente esperadas (veja `backend/.env.example`):
+
+```
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/app_db
+PGHOST=localhost
+PGPORT=5432
+PGUSER=postgres
+PGPASSWORD=postgres
+PGDATABASE=app_db
+PGSSLMODE=disable
+```
+
+3) Para inicializar a estrutura mínima (exemplo):
+
+```powershell
+# conectar ao container usando psql (ou use um cliente GUI)
+psql -h localhost -U postgres -d app_db
+# depois dentro do psql, execute o SQL em backend/init-db.sql
+\i backend/init-db.sql
+```
+
+OBS: o backend expõe `/api/db-ping` que retorna a hora do servidor Postgres se a conexão estiver correta.
