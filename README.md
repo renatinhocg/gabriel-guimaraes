@@ -67,3 +67,17 @@ psql -h localhost -U postgres -d app_db
 ```
 
 OBS: o backend expõe `/api/db-ping` que retorna a hora do servidor Postgres se a conexão estiver correta.
+
+Deploy no Railway — se continuar com erro
+---------------------------------------
+
+Se o Railway continuar a falhar na etapa "Build image" por problemas de dependências nativas (rollup/esbuild), uma solução robusta é usar o Dockerfile do serviço para garantir um ambiente idêntico ao local. Eu adicionei `frontend/Dockerfile` e `admin/Dockerfile` que usam Node 18 para build e `nginx` para servir o `dist/`.
+
+Opções de deploy no Railway:
+
+- Usar o Dockerfile (recomendado): vá no serviço → Settings e selecione para fazer build com Dockerfile (ou configure para usar Dockerfile na criação do serviço). Isso cria imagem consistente e evita problemas com dependências nativas.
+- Ajustar install/build commands: em Settings -> Build, defina `Install Command` como `npm ci` e `Build Command` como `npm run build` (ou `npm install` caso você precise incluir devDependencies). Outra opção é setar a variável `NPM_CONFIG_PRODUCTION=false` para forçar instalar `devDependencies`.
+
+Se quiser, eu posso também:
+- adicionar `.nvmrc` (já adicionado) e Dockerfile para cada app (já feito) e criar um workflow do GitHub Actions que testa e constrói artefatos (opcional),
+- ou criar Dockerfile também para `backend` e um workflow de CI/CD.
