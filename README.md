@@ -78,6 +78,22 @@ Opções de deploy no Railway:
 - Usar o Dockerfile (recomendado): vá no serviço → Settings e selecione para fazer build com Dockerfile (ou configure para usar Dockerfile na criação do serviço). Isso cria imagem consistente e evita problemas com dependências nativas.
 - Ajustar install/build commands: em Settings -> Build, defina `Install Command` como `npm ci` e `Build Command` como `npm run build` (ou `npm install` caso você precise incluir devDependencies). Outra opção é setar a variável `NPM_CONFIG_PRODUCTION=false` para forçar instalar `devDependencies`.
 
+Automação (GitHub Actions)
+--------------------------------
+
+Adicionei um workflow do GitHub Actions que builda imagens Docker para `frontend`, `admin` e `backend` e as publica no GitHub Container Registry (GHCR) em pushes para `main`.
+
+Como usar as imagens no Railway:
+
+1. Vá no serviço do Railway (por exemplo `frontend`) → Settings → Deploy settings (ou similar) e selecione "Deploy from image" / "Container Registry".
+2. Use a URL da imagem criada pelo workflow: `ghcr.io/<YOUR_GITHUB_ORG_OR_USER>/gabriel-guimaraes-frontend:latest` (substitua `<YOUR_GITHUB_ORG_OR_USER>` pelo seu usuário ou organização GitHub).
+3. Para backend use `ghcr.io/<YOUR_GITHUB_ORG_OR_USER>/gabriel-guimaraes-backend:latest`.
+4. Em Variables defina `DATABASE_URL` apontando para o Postgres da Railway e `PGSSLMODE=require` se necessário.
+
+Observações de permissões:
+- O workflow usa o `GITHUB_TOKEN` para autenticar e publicar em GHCR; quando o Actions rodar, as imagens serão escritas para `ghcr.io/${{ github.repository_owner }}`. Certifique-se que sua conta/organização permita pacotes e que o token tenha permissions (o fluxo padrão funciona para a maioria dos repositórios).
+
+
 Se quiser, eu posso também:
 - adicionar `.nvmrc` (já adicionado) e Dockerfile para cada app (já feito) e criar um workflow do GitHub Actions que testa e constrói artefatos (opcional),
 - ou criar Dockerfile também para `backend` e um workflow de CI/CD.
